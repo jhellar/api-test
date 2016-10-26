@@ -49,6 +49,9 @@ function runCordova() {
     //     return reject(err);
     //   }
       cordova = execFile('cordova', ['serve'], { cwd: testAppFolder });
+      cordova.stdout.on('data', (data) => {
+        console.log(data);
+      });
       resolve();
     // });
   });
