@@ -44,13 +44,13 @@ fhcInit(config)
 
 function runCordova() {
   return new Promise(function(resolve, reject) {
-    execFile('cordova', ['build'], { cwd: testAppFolder }, (err, stdout, stderr) => {
-      if (err) {
-        return reject(err);
-      }
+    // execFile('cordova', ['build'], { cwd: testAppFolder }, (err, stdout, stderr) => {
+    //   if (err) {
+    //     return reject(err);
+    //   }
       cordova = execFile('cordova', ['serve'], { cwd: testAppFolder });
       resolve();
-    });
+    // });
   });
 }
 
