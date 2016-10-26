@@ -1,0 +1,25 @@
+{
+  "name": "api-test",
+  "version": "1.0.1",
+  "description": "Tests Client API.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jan Hellar",
+  "license": "ISC",
+  "dependencies": {
+    "fh-fhc": "^2.1.0",
+    "request": "^2.75.0",
+    "underscore": "^1.8.3",
+    "webdriverio": "^4.2.16"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhellar/api-test.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jhellar/api-test/issues"
+  },
+  "homepage": "https://github.com/jhellar/api-test#readme"
+}
