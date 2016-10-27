@@ -8,28 +8,26 @@ const webdriverio = require('webdriverio');
 const fhcInit = require('./lib/fhc-init');
 const fhcCreateProject = require('./lib/fhc-create-project');
 const fhcDeleteProject = require('./lib/fhc-delete-project');
+const fhcCreatePolicy = require('./lib/fhc-create-policy');
+const fhcDeletePolicy = require('./lib/fhc-delete-policy');
 
 const testAppFolder = __dirname + '/test_app/';
-const projectName = 'api-test-project';
-
 const config = require('./config/rhmap');
 const cordovaUrl = 'http://localhost:8000/browser/www/index.html';
 
+const projectName = 'api-test-project';
+const policyName = 'api-test-policy';
+
 var project;
+var policy;
 var cordova;
 var success;
 
-fhcInit(config)
-  .then(forwardProjectDetails)
-  .then(fhcCreateProject)
-  .then(saveProject)
-  .then(setFhconfig)
-  .then(setTestConfig)
+prepareEnvironment()
   .then(runCordova)
   .then(checkResults)
   .then(stopCordova)
-  .then(forwardProjectGuid)
-  .then(fhcDeleteProject)
+  .then(cleanEnvironment)
   .then(() => {
     if (success) {
       console.log('TEST SUCCESS');
@@ -41,6 +39,33 @@ fhcInit(config)
   .catch((err) => {
     console.error(err);
   });
+
+function prepareEnvironment() {
+  return fhcInit(config)
+    .then(prepareProject)
+    .then(preparePolicy)
+    .then(setFhconfig)
+    .then(setTestConfig);
+}
+
+function prepareProject() {
+  return forwardProjectDetails()
+    .then(fhcCreateProject)
+    .then(saveProject);
+}
+
+function preparePolicy() {
+  return forwardPolicyDetails()
+    .then(fhcCreatePolicy)
+    .then(savePolicy);
+}
+
+function cleanEnvironment() {
+  return forwardProjectGuid()
+    .then(fhcDeleteProject)
+    .then(forwardPolicyGuid)
+    .then(fhcDeletePolicy);
+}
 
 function runCordova() {
   return new Promise(function(resolve, reject) {
@@ -91,10 +116,22 @@ function checkResults() {
 }
 
 function forwardProjectDetails() {
-  return {
+  return Promise.resolve({
     name: projectName,
     template: 'hello_world_project'
-  };
+  });
+}
+
+function forwardPolicyDetails() {
+  return Promise.resolve({
+    checkUserApproved: false,
+    checkUserExists: true,
+    configurations: {
+      provider: "FEEDHENRY"
+    },
+    policyId: policyName,
+    policyType: "FEEDHENRY"
+  });
 }
 
 function setFhconfig() {
@@ -121,11 +158,14 @@ function setFhconfig() {
 }
 
 function setTestConfig() {
+  var app = _.find(project.apps, (app) => {
+    return app.type === 'client_advanced_hybrid';
+  });
   var testConf = {
     username: config.username,
     password: config.password,
-    policyId: config.policyId,
-    clientToken: config.clientToken
+    policyId: policyName,
+    clientToken: app.guid
   }
   return new Promise(function(resolve, reject) {
     fs.writeFile(testAppFolder + 'www/testconfig.json', JSON.stringify(testConf, null, 2), (err) => {
@@ -139,11 +179,19 @@ function setTestConfig() {
 }
 
 function forwardProjectGuid() {
-  return { guid: project.guid };
+  return Promise.resolve({ guid: project.guid });
+}
+
+function forwardPolicyGuid() {
+  return Promise.resolve({ guid: policy.guid });
 }
 
 function saveProject(projectDetails) {
   project = projectDetails;
+}
+
+function savePolicy(policyDetails) {
+  policy = policyDetails;
 }
 
 function httpRequest(url) {
