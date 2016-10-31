@@ -2,6 +2,7 @@ loadConfig()
   .then(auth)
   .then(authFail)
   .then(authValidate)
+  .then(authLogOut)
   .then(finished);
 
 var testConfig;
@@ -88,6 +89,26 @@ function authValidate() {
         document.getElementById('auth-valid-status').innerHTML += 'user not authenticated ERROR';
         resolve();
       }
+    });
+  });
+}
+
+function authLogOut() {
+  document.getElementById('auth-log-out').innerHTML += "testing... ";
+  return new Promise(function(resolve, reject) {
+    $fh.auth.clearSession(function(err){
+      $fh.auth.hasSession(function(err, exist){
+        if (err) {
+          document.getElementById('auth-log-out').innerHTML += "failed to check session ERROR";
+          return resolve();
+        }
+        if (exist) {
+          document.getElementById('auth-log-out').innerHTML += "session still valid ERROR";
+          return resolve();
+        }
+        document.getElementById('auth-log-out').innerHTML += "OK";
+        resolve();
+      });
     });
   });
 }
