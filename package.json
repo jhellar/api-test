@@ -2,15 +2,29 @@
   "name": "api-test",
   "version": "1.0.1",
   "description": "Tests Client API.",
-  "main": "main.js",
+  "main": "api-test.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "browserify": "browserify ./test_app/www/js/test.js -o ./test_app/www/js/test-bundle.js",
+    "add-platform": "cd test_app && cordova platform add browser",
+    "rm-platform": "cd test_app && cordova platform rm browser",
+    "selenium": "java -Dwebdriver.chrome.driver=node_modules/chromedriver/lib/chromedriver/chromedriver -jar node_modules/selenium-server/lib/runner/selenium-server-standalone-3.0.1.jar &",
+    "stop-selenium": "lsof -i tcp:4444 | grep LISTEN | awk '{print $2}' | xargs kill",
+    "prestart": "npm run browserify && npm run add-platform && npm run selenium",
+    "start": "./api-test.js",
+    "poststart": "npm run stop-selenium && npm run rm-platform",
+    "prestart-no-selenium": "npm run browserify && npm run add-platform",
+    "start-no-selenium": "./api-test.js",
+    "poststart-no-selenium": "npm run rm-platform"
   },
   "author": "Jan Hellar",
   "license": "ISC",
   "dependencies": {
+    "browserify": "^13.1.1",
+    "chromedriver": "^2.25.1",
     "fh-fhc": "^2.1.0",
     "request": "^2.75.0",
+    "selenium-server": "^3.0.1",
     "underscore": "^1.8.3",
     "webdriverio": "^4.2.16"
   },
@@ -21,5 +35,6 @@
   "bugs": {
     "url": "https://github.com/jhellar/api-test/issues"
   },
-  "homepage": "https://github.com/jhellar/api-test#readme"
+  "homepage": "https://github.com/jhellar/api-test#readme",
+  "devDependencies": {}
 }
