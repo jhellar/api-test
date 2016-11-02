@@ -10,6 +10,7 @@ const fhcCreateProject = require('./lib/fhc-create-project');
 const fhcDeleteProject = require('./lib/fhc-delete-project');
 const fhcCreatePolicy = require('./lib/fhc-create-policy');
 const fhcDeletePolicy = require('./lib/fhc-delete-policy');
+const fhcAppDeploy = require('./lib/fhc-app-deploy');
 
 const testAppFolder = __dirname + '/test_app/';
 const config = require('./config/rhmap');
@@ -43,26 +44,44 @@ prepareEnvironment()
 function prepareEnvironment() {
   return fhcInit(config)
     .then(prepareProject)
+    .then(deployCloudApp)
     .then(preparePolicy)
     .then(setFhconfig)
     .then(setTestConfig);
 }
 
+function deployCloudApp() {
+  var app = _.find(project.apps, (app) => {
+    return app.type === 'cloud_nodejs';
+  });
+
+  return fhcAppDeploy({
+    appGuid: app.guid,
+    env: config.environment
+  });
+}
+
 function prepareProject() {
-  return forwardProjectDetails()
-    .then(fhcCreateProject)
-    .then(saveProject);
+  return fhcCreateProject({
+    name: projectName,
+    template: 'hello_world_project'
+  }).then(saveProject);
 }
 
 function preparePolicy() {
-  return forwardPolicyDetails()
-    .then(fhcCreatePolicy)
-    .then(savePolicy);
+  return fhcCreatePolicy({
+    checkUserApproved: false,
+    checkUserExists: true,
+    configurations: {
+      provider: "FEEDHENRY"
+    },
+    policyId: policyName,
+    policyType: "FEEDHENRY"
+  }).then(savePolicy);
 }
 
 function cleanEnvironment() {
-  return forwardProjectGuid()
-    .then(fhcDeleteProject)
+  return fhcDeleteProject({ guid: project.guid })
     .then(forwardPolicyGuid)
     .then(fhcDeletePolicy);
 }
@@ -115,25 +134,6 @@ function checkResults() {
   }
 }
 
-function forwardProjectDetails() {
-  return Promise.resolve({
-    name: projectName,
-    template: 'hello_world_project'
-  });
-}
-
-function forwardPolicyDetails() {
-  return Promise.resolve({
-    checkUserApproved: false,
-    checkUserExists: true,
-    configurations: {
-      provider: "FEEDHENRY"
-    },
-    policyId: policyName,
-    policyType: "FEEDHENRY"
-  });
-}
-
 function setFhconfig() {
   var app = _.find(project.apps, (app) => {
     return app.type === 'client_advanced_hybrid';
@@ -176,10 +176,6 @@ function setTestConfig() {
       resolve();
     });
   });
-}
-
-function forwardProjectGuid() {
-  return Promise.resolve({ guid: project.guid });
 }
 
 function forwardPolicyGuid() {

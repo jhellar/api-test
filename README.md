@@ -7,7 +7,8 @@ To start the test you will first have to create "config" directory with file "rh
 module.exports = {
   host: '...',
   username: '...',
-  password: '...'
+  password: '...',
+  environment: '...'
 };
 ```
 

@@ -11,7 +11,7 @@
     "selenium": "java -Dwebdriver.chrome.driver=node_modules/chromedriver/lib/chromedriver/chromedriver -jar node_modules/selenium-server/lib/runner/selenium-server-standalone-3.0.1.jar &",
     "stop-selenium": "lsof -i tcp:4444 | grep LISTEN | awk '{print $2}' | xargs kill",
     "prestart": "npm run browserify && npm run add-platform && npm run selenium",
-    "start": "./api-test.js",
+    "start": "./api-test.js || true",
     "poststart": "npm run stop-selenium && npm run rm-platform",
     "prestart-no-selenium": "npm run browserify && npm run add-platform",
     "start-no-selenium": "./api-test.js",
