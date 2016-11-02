@@ -5,6 +5,9 @@ const fs = require('fs');
 const execFile = require('child_process').execFile;
 const request = require('request');
 const webdriverio = require('webdriverio');
+const program = require('commander');
+const pkg = require('./package.json');
+
 const fhcInit = require('./lib/fhc-init');
 const fhcCreateProject = require('./lib/fhc-create-project');
 const fhcDeleteProject = require('./lib/fhc-delete-project');
@@ -13,7 +16,6 @@ const fhcDeletePolicy = require('./lib/fhc-delete-policy');
 const fhcAppDeploy = require('./lib/fhc-app-deploy');
 
 const testAppFolder = __dirname + '/test_app/';
-const config = require('./config/rhmap');
 const cordovaUrl = 'http://localhost:8000/browser/www/index.html';
 
 const projectName = 'api-test-project';
@@ -23,6 +25,21 @@ var project;
 var policy;
 var cordova;
 var success;
+
+program
+  .version(pkg.version)
+  .description(pkg.description)
+  .option('-h, --host <address>', 'Host - required')
+  .option('-u, --username <username>', 'Username - required')
+  .option('-p, --password <password>', 'Password - required')
+  .option('-e, --environment <environment>', 'Environment to be used for app deployment - required')
+  .option('-f, --exit-fail', 'When test fails exit with code 1')
+  .parse(process.argv);
+
+if (!program.host || !program.username || !program.password || !program.environment) {
+  program.outputHelp();
+  process.exit();
+}
 
 prepareEnvironment()
   .then(runCordova)
@@ -42,7 +59,7 @@ prepareEnvironment()
   });
 
 function prepareEnvironment() {
-  return fhcInit(config)
+  return fhcInit(program)
     .then(prepareProject)
     .then(deployCloudApp)
     .then(preparePolicy)
@@ -57,7 +74,7 @@ function deployCloudApp() {
 
   return fhcAppDeploy({
     appGuid: app.guid,
-    env: config.environment
+    env: program.environment
   });
 }
 
@@ -143,7 +160,7 @@ function setFhconfig() {
     appkey: app.apiKey,
     apptitle: app.title,
     connectiontag: '0.0.1',
-    host: config.host,
+    host: program.host,
     projectid: project.guid,
   }
   return new Promise(function(resolve, reject) {
@@ -162,8 +179,8 @@ function setTestConfig() {
     return app.type === 'client_advanced_hybrid';
   });
   var testConf = {
-    username: config.username,
-    password: config.password,
+    username: program.username,
+    password: program.password,
     policyId: policyName,
     clientToken: app.guid
   }

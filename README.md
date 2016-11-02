@@ -2,18 +2,8 @@
 
 Tests Client API.
 
-To start the test you will first have to create "config" directory with file "rhmap.js":
-```
-module.exports = {
-  host: '...',
-  username: '...',
-  password: '...',
-  environment: '...'
-};
-```
-
-Then run:
+To start the test run:
 ```
 npm install
-npm start
+npm start -- --host ... --username ... --password ... --environment ...
 ```
